@@ -1,0 +1,78 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net9.0</TargetFramework>
+    <RootNamespace>ImageLinks_.Application</RootNamespace>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Folder Include="Common\Enums\" />
+    <Folder Include="Features\DocumentClass\DTO\" />
+    <Folder Include="Features\DocumentClass\IRepository\" />
+    <Folder Include="Features\DocumentClass\Mappers\" />
+    <Folder Include="Features\DocumentClass\Requests\" />
+    <Folder Include="Features\DocumentClass\Services\Implementation\" />
+    <Folder Include="Features\DocumentClass\Services\Interface\" />
+    <Folder Include="Features\Drawers\DTO\" />
+    <Folder Include="Features\Drawers\IRepository\" />
+    <Folder Include="Features\Drawers\Mappers\" />
+    <Folder Include="Features\Drawers\Requests\" />
+    <Folder Include="Features\Drawers\Services\Implementation\" />
+    <Folder Include="Features\Drawers\Services\Interface\" />
+    <Folder Include="Features\Folders\DTO\" />
+    <Folder Include="Features\Folders\IRepository\" />
+    <Folder Include="Features\Folders\Mappers\" />
+    <Folder Include="Features\Folders\Requests\" />
+    <Folder Include="Features\Folders\Services\Implementation\" />
+    <Folder Include="Features\Folders\Services\Interface\" />
+    <Folder Include="Features\Groups\DTO\" />
+    <Folder Include="Features\Groups\IRepository\" />
+    <Folder Include="Features\Groups\Mappers\" />
+    <Folder Include="Features\Groups\Requests\" />
+    <Folder Include="Features\Groups\Services\Implementation\" />
+    <Folder Include="Features\Groups\Services\Interface\" />
+    <Folder Include="Features\Identity\IRepository\" />
+    <Folder Include="Features\Identity\Mappers\" />
+    <Folder Include="Features\Indexes\DTO\" />
+    <Folder Include="Features\Indexes\IRepository\" />
+    <Folder Include="Features\Indexes\Mappers\" />
+    <Folder Include="Features\Indexes\Requests\" />
+    <Folder Include="Features\Indexes\Services\Implementation\" />
+    <Folder Include="Features\Indexes\Services\Interface\" />
+    <Folder Include="Features\Pages\DTO\" />
+    <Folder Include="Features\Pages\IRepository\" />
+    <Folder Include="Features\Pages\Mappers\" />
+    <Folder Include="Features\Pages\Requests\" />
+    <Folder Include="Features\Pages\Services\Implementation\" />
+    <Folder Include="Features\Pages\Services\Interface\" />
+    <Folder Include="Features\Search\DTO\" />
+    <Folder Include="Features\Search\IRepository\" />
+    <Folder Include="Features\Search\Mappers\" />
+    <Folder Include="Features\Search\Requests\" />
+    <Folder Include="Features\Search\Services\Implementation\" />
+    <Folder Include="Features\Search\Services\Interface\" />
+    <Folder Include="Features\SysSettingDetail\Mappers\" />
+    <Folder Include="Features\SysSettingDetail\Requests\" />
+    <Folder Include="Features\SysSettingDetail\Services\Implementation\" />
+    <Folder Include="Features\SysSettingDetail\Services\Interface\" />
+    <Folder Include="Features\Trees\DTO\" />
+    <Folder Include="Features\Trees\IRepository\" />
+    <Folder Include="Features\Trees\Mappers\" />
+    <Folder Include="Features\Trees\Requests\" />
+    <Folder Include="Features\Trees\Services\Implementation\" />
+    <Folder Include="Features\Trees\Services\Interface\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Dapper" Version="2.1.66" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.Abstractions" Version="9.0.9" />
+    <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="6.35.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\ImageLinks®.Domain\ImageLinks®.Domain.csproj" />
+  </ItemGroup>
+
+</Project>
