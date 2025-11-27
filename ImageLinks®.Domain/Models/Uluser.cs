@@ -1,6 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using Microsoft.EntityFrameworkCore;
 
@@ -8,7 +6,7 @@ namespace ImageLinks_.Domain.Models;
 
 [Keyless]
 [Table("ULUSERS")]
-public partial class Uluser
+public class Uluser
 {
     [Column("USER_ID")]
     [Precision(4)]

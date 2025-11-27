@@ -27,7 +27,7 @@ namespace ImageLinks_.Infrastructure.Features.Users.Repository
             _db.USERS.Update(entity);
         }
 
-        public async Task<User?> SelectAsync(User filter, CancellationToken ct = default)
+        public async Task<List<User?>> SelectAsync(User filter, CancellationToken ct = default)
         {
             var dbType = _genericService.GetDatabaseType();
             var sql = new StringBuilder(@"
@@ -85,19 +85,19 @@ namespace ImageLinks_.Infrastructure.Features.Users.Repository
             if (!string.IsNullOrEmpty(filter.UserName))
             {
                 sql.Append($" AND LOWER(USER_NAME) = LOWER({GeneralFunction.GetParam("UserName", dbType)})");
-                parameters.Add("UserName", filter.UserName);
+                parameters.Add("UserName", filter.UserName.ToLower());
             }
 
             if (!string.IsNullOrEmpty(filter.UserMail))
             {
                 sql.Append($" AND LOWER(USER_MAIL) = LOWER({GeneralFunction.GetParam("UserMail", dbType)})");
-                parameters.Add("UserMail", filter.UserMail);
+                parameters.Add("UserMail", filter.UserMail.ToLower());
             }
 
             if (!string.IsNullOrEmpty(filter.UserCUser))
             {
                 sql.Append($" AND LOWER(USER_CUSER) = LOWER({GeneralFunction.GetParam("UserCUser", dbType)})");
-                parameters.Add("UserCUser", filter.UserCUser);
+                parameters.Add("UserCUser", filter.UserCUser.ToLower());
             }
 
             if (!string.IsNullOrEmpty(filter.UserPass))
@@ -109,11 +109,11 @@ namespace ImageLinks_.Infrastructure.Features.Users.Repository
             if (!string.IsNullOrEmpty(filter.UserAbriv))
             {
                 sql.Append($" AND LOWER(USER_ABRIV) = LOWER({GeneralFunction.GetParam("UserAbriv", dbType)})");
-                parameters.Add("UserAbriv", filter.UserAbriv);
+                parameters.Add("UserAbriv", filter.UserAbriv.ToLower());
             }
 
-            var list = await _genericService.GetListAsync<User>(sql.ToString(), parameters, null, ct);
-            return list.FirstOrDefault();
+            return await _genericService.GetListAsync<User>(sql.ToString(), parameters, null, ct);
+             
         }
 
         public async Task<List<User>> GetAllUsers(CancellationToken ct = default)

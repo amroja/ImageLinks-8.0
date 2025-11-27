@@ -1,6 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using Microsoft.EntityFrameworkCore;
 
@@ -9,7 +7,7 @@ namespace ImageLinks_.Domain.Models;
 [Table("DB_LOGIN")]
 [Index("LicenseDomainId", Name = "DOMAIN_ID_IDX")]
 [Index("UserId", "LoginFrom", Name = "UC_USERID_LOGINFROM", IsUnique = true)]
-public partial class DbLogin
+public class DbLogin
 {
     [Key]
     [Column("REC_ID")]

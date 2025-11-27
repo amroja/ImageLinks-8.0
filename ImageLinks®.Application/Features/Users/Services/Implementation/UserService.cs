@@ -1,8 +1,10 @@
 ﻿using ImageLinks_.Application.Common.Models;
+using ImageLinks_.Application.Features.SysSettingDetail.DTO;
 using ImageLinks_.Application.Features.Users.DTO;
 using ImageLinks_.Application.Features.Users.IRepository;
 using ImageLinks_.Application.Features.Users.Mappers;
 using ImageLinks_.Application.Features.Users.Services.Interface;
+using ImageLinks_.Domain.Models;
 using ImageLinks_.Domain.Results;
 
 namespace ImageLinks_.Application.Features.Users.Services.Implementation
@@ -25,9 +27,9 @@ namespace ImageLinks_.Application.Features.Users.Services.Implementation
 
         public async Task<Result<List<UserDto>>> GetAllUsersDP(CancellationToken ct)
         {
-            var x = await _sysSettingDetailRepository.SelectAsync(new(), ct);
+            var x = await _sysSettingDetailRepository.SelectAsync(new SysSettingDetailDto(), ct);
             var mx = await _sysSettingDetailRepository.GetAll(ct, x => x.SysSettValue == "1");
-            var users = await _userRepository.GetAllUsers(ct);
+            List<User>? users = await _userRepository.GetAllUsers(ct);
             return users.ToDtos();
         }
 

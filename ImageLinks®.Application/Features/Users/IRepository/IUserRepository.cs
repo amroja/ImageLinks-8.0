@@ -5,10 +5,8 @@ namespace ImageLinks_.Application.Features.Users.IRepository
 {
     public interface IUserRepository : IRepository<User>
     {
-        Task<User?> SelectAsync(User filter, CancellationToken ct = default);
+        Task<List<User?>> SelectAsync(User filter, CancellationToken ct = default);
         Task<List<User>> GetAllUsers(CancellationToken ct = default);
-
         Task<List<User>> GetUsersFilter(PageRequest pageRequest, CancellationToken ct = default);
-
     }
 }

@@ -79,7 +79,7 @@ namespace ImageLinks_.Infrastructure.Repository
             dt.Load(reader);
             return dt;
         }
-        public async Task<List<T>> GetListAsync<T>(
+        public async Task<List<T?>> GetListAsync<T>(
            string sql,
            object? parameters = null,
            string? connectionString = null,

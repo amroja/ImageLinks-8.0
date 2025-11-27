@@ -1,22 +1,23 @@
 ﻿using ImageLinks_.Domain.Enums;
 using System.Data;
 
-namespace ImageLinks_.Application.IRepository
+namespace ImageLinks_.Application.IRepository;
+
+public interface IGenericRepository
 {
-    public interface IGenericRepository
-    {
-        Task<string?> ExecuteScalarAsync(string sql, object? parameters = null, string? connectionString = null, CancellationToken ct = default);
+    Task<string?> ExecuteScalarAsync(string sql, object? parameters = null, string? connectionString = null, CancellationToken ct = default);
 
-        Task<DataTable> GetDataTableAsync(string sql, object? parameters = null, string? connectionString = null, CancellationToken ct = default);
-        Task<List<T>> GetListAsync<T>(string sql, object? parameters = null, string? connectionString = null, CancellationToken ct = default);
-        Task<int> ExecuteNonQueryAsync(string sql, object? parameters = null, string? connectionString = null, CancellationToken ct = default);
+    Task<DataTable> GetDataTableAsync(string sql, object? parameters = null, string? connectionString = null, CancellationToken ct = default);
 
-        Task<int> ExecuteTransactionAsync(IEnumerable<string> sqlStatements, string? connectionString = null, CancellationToken ct = default);
+    Task<List<T?>> GetListAsync<T>(string sql, object? parameters = null, string? connectionString = null, CancellationToken ct = default);
 
-        DatabaseProvider GetDatabaseType(string? connectionString = null);
+    Task<int> ExecuteNonQueryAsync(string sql, object? parameters = null, string? connectionString = null, CancellationToken ct = default);
 
-        bool IsDatabaseEmpty();
+    Task<int> ExecuteTransactionAsync(IEnumerable<string> sqlStatements, string? connectionString = null, CancellationToken ct = default);
 
-        string GetDatabaseName();
-    }
+    DatabaseProvider GetDatabaseType(string? connectionString = null);
+
+    bool IsDatabaseEmpty();
+
+    string GetDatabaseName();
 }

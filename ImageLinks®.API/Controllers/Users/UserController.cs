@@ -1,16 +1,17 @@
 ﻿using ImageLinks_.Application.Common.Models;
+using ImageLinks_.Application.Features.Master.UsersMaster.Services.Interface;
 using ImageLinks_.Application.Features.Users.Services.Interface;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
-namespace ImageLinks_.API.Controllers
+namespace ImageLinks_.API.Controllers.Users
 {
     [Route("api/[controller]")]
     [ApiController]
     public class UserController : ApiController
     {
         private readonly IUserService _userService;
-
+        
         public UserController(IUserService userService)
         {
             _userService = userService;

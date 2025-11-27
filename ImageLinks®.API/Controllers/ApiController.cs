@@ -1,49 +1,47 @@
 ﻿using ImageLinks_.Domain.Results;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
 
-namespace ImageLinks_.API.Controllers
+namespace ImageLinks_.API.Controllers;
+
+[ApiController]
+public class ApiController : ControllerBase
 {
-    [ApiController]
-    public class ApiController : ControllerBase
+    protected ActionResult Problem(List<Error> errors)
     {
-        protected ActionResult Problem(List<Error> errors)
+        if (errors.Count is 0)
         {
-            if (errors.Count is 0)
-            {
-                return Problem();
-            }
-
-            if (errors.All(error => error.Type == ErrorKind.Validation))
-            {
-                return ValidationProblem(errors);
-            }
-
-            return Problem(errors[0]);
+            return Problem();
         }
 
-        private ObjectResult Problem(Error error)
+        if (errors.All(error => error.Type == ErrorKind.Validation))
         {
-            var statusCode = error.Type switch
-            {
-                ErrorKind.Conflict => StatusCodes.Status409Conflict,
-                ErrorKind.Validation => StatusCodes.Status400BadRequest,
-                ErrorKind.NotFound => StatusCodes.Status404NotFound,
-                ErrorKind.Unauthorized => StatusCodes.Status403Forbidden,
-                _ => StatusCodes.Status500InternalServerError,
-            };
-
-            return Problem(statusCode: statusCode, title: error.Description);
+            return ValidationProblem(errors);
         }
 
-        private ActionResult ValidationProblem(List<Error> errors)
+        return Problem(errors[0]);
+    }
+
+    private ObjectResult Problem(Error error)
+    {
+        var statusCode = error.Type switch
         {
-            var modelStateDictionary = new ModelStateDictionary();
+            ErrorKind.Conflict => StatusCodes.Status409Conflict,
+            ErrorKind.Validation => StatusCodes.Status400BadRequest,
+            ErrorKind.NotFound => StatusCodes.Status404NotFound,
+            ErrorKind.Unauthorized => StatusCodes.Status403Forbidden,
+            _ => StatusCodes.Status500InternalServerError,
+        };
 
-            errors.ForEach(error => modelStateDictionary.AddModelError(error.Code, error.Description));
+        return Problem(statusCode: statusCode, title: error.Description);
+    }
 
-            return ValidationProblem(modelStateDictionary);
-        }
+    private ActionResult ValidationProblem(List<Error> errors)
+    {
+        var modelStateDictionary = new ModelStateDictionary();
+
+        errors.ForEach(error => modelStateDictionary.AddModelError(error.Code, error.Description));
+
+        return ValidationProblem(modelStateDictionary);
     }
 }

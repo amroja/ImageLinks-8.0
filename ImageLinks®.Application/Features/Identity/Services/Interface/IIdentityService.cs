@@ -1,6 +1,5 @@
 ﻿using ImageLinks_.Application.Features.Identity.DTO;
 using ImageLinks_.Application.Features.Identity.Requests;
-using ImageLinks_.Application.Features.Users.DTO;
 using ImageLinks_.Domain.Results;
 
 namespace ImageLinks_.Application.Features.Identity.Services.Interface

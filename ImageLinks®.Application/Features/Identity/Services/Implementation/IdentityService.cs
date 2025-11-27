@@ -2,9 +2,11 @@
 using ImageLinks_.Application.Features.Identity.DTO;
 using ImageLinks_.Application.Features.Identity.Requests;
 using ImageLinks_.Application.Features.Identity.Services.Interface;
+using ImageLinks_.Application.Features.Master.MasterConfig.Services.Interface;
+using ImageLinks_.Application.Features.Master.MasterDbServersConfig.Services.Interface;
 using ImageLinks_.Application.Features.Users.DTO;
 using ImageLinks_.Application.Features.Users.IRepository;
-using ImageLinks_.Application.Features.Users.Mappers;
+using ImageLinks_.Application.Features.Users.Services.Interface;
 using ImageLinks_.Domain.Models;
 using ImageLinks_.Domain.Results;
 using Microsoft.Extensions.Configuration;
@@ -12,6 +14,7 @@ using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
+using System.Text.Json;
 
 namespace ImageLinks_.Application.Features.Identity.Services.Implementation
 {
@@ -19,10 +22,21 @@ namespace ImageLinks_.Application.Features.Identity.Services.Implementation
     {
         private readonly IUserRepository _userRepository;
         private readonly IConfiguration _configuration ;
-        public IdentityService(IUserRepository userRepository, IConfiguration configuration)
+        private readonly IMasterConfigService _masterConfigService;
+        private readonly IMasterDbServersConfigService _masterDbServersConfigService;
+        private readonly IUserPrivilegeService _userPrivilegeService;
+
+        public IdentityService(IUserRepository userRepository,
+            IConfiguration configuration,
+            IMasterConfigService masterConfigService,
+            IMasterDbServersConfigService masterDbServersConfigService,
+            IUserPrivilegeService userPrivilegeService)
         {
             _userRepository = userRepository;
             _configuration= configuration;
+            _masterConfigService = masterConfigService;
+            _masterDbServersConfigService = masterDbServersConfigService;
+            _userPrivilegeService = userPrivilegeService;
         }
 
         public async Task<Result<TokenDto>> Login(LoginRequest login, CancellationToken ct)
@@ -38,33 +52,39 @@ namespace ImageLinks_.Application.Features.Identity.Services.Implementation
                 UserPass = Encryption.EncryptAES(login.Password)
             };
 
-            user = await _userRepository.SelectAsync(dapperUser, ct);  // Dapper
-
-            user = await _userRepository.Get(u => u.UserName.ToLower() == dapperUser.UserName.ToLower() && u.UserPass == dapperUser.UserPass);  // EF
+            user = (await _userRepository.SelectAsync(dapperUser, ct)).SingleOrDefault();
 
             if (user == null)
                 return Error.NotFound("UserNotFound", "Invalid username or password.");
 
-           return CreateAsync(user);
+            UserPrivilegeDto? privilage = await _userPrivilegeService.GetUserPrivilege(new UserDto { UserId = user.UserId.ToString() }, ct);
+
+            return CreateAsync(user, privilage);
         }
 
-        private TokenDto CreateAsync(User user)
+        private TokenDto CreateAsync(User user, UserPrivilegeDto privileges)
         {
-            var jwtSettings = _configuration.GetSection("JwtSettings");
+            IConfigurationSection jwtSettings = _configuration.GetSection("JwtSettings");
+            string issuer = jwtSettings["Issuer"]!;
+            string audience = jwtSettings["Audience"]!;
+            string key = jwtSettings["Secret"]!;
+            DateTime expires = DateTime.UtcNow.AddMinutes(
+                int.Parse(jwtSettings["TokenExpirationInMinutes"]!)
+            );
 
-            var issuer = jwtSettings["Issuer"]!;
-            var audience = jwtSettings["Audience"]!;
-            var key = jwtSettings["Secret"]!;
-
-            var expires = DateTime.UtcNow.AddMinutes(int.Parse(jwtSettings["TokenExpirationInMinutes"]!));
-
-            var claims = new List<Claim>
+            List<Claim> claims = new List<Claim>
             {
-            new (JwtRegisteredClaimNames.Sub, user.UserId.ToString()),
-            new (JwtRegisteredClaimNames.Name, user.UserName!),
+                new Claim(ClaimTypes.NameIdentifier, user.UserId.ToString()),
+                new Claim(ClaimTypes.Name, user.UserName ?? ""),
+                new Claim(ClaimTypes.Email, user.UserMail ?? ""),
+                new Claim("LicenseDomainId", user.LicenseDomainId?.ToString() ?? ""),
+                new Claim("privileges", JsonSerializer.Serialize(privileges, new JsonSerializerOptions
+                {
+                    PropertyNamingPolicy = JsonNamingPolicy.CamelCase
+                }))
             };
 
-            var descriptor = new SecurityTokenDescriptor
+            SecurityTokenDescriptor descriptor = new SecurityTokenDescriptor
             {
                 Subject = new ClaimsIdentity(claims),
                 Expires = expires,
@@ -75,9 +95,8 @@ namespace ImageLinks_.Application.Features.Identity.Services.Implementation
                     SecurityAlgorithms.HmacSha256Signature),
             };
 
-            var tokenHandler = new JwtSecurityTokenHandler();
-
-            var securityToken = tokenHandler.CreateToken(descriptor);
+            JwtSecurityTokenHandler tokenHandler = new JwtSecurityTokenHandler();
+            SecurityToken securityToken = tokenHandler.CreateToken(descriptor);
 
             return new TokenDto
             {

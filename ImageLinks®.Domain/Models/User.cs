@@ -51,9 +51,5 @@ public class User
 
     [Column("IS_MANAGER")]
     public bool? IsManager { get; set; }
-
-    //[Column("EMAIL_PWD")]
-    //[MaxLength(100)]
-    //public string? EmailPwd { get; set; }
 }
 

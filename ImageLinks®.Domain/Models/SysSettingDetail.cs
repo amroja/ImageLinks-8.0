@@ -1,17 +1,18 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using Microsoft.EntityFrameworkCore;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace ImageLinks_.Domain.Models;
 
 [Table("SETT_SYSSETTDETAILS")]
+[PrimaryKey(nameof(SysSettId), nameof(SysSettTypeId))]
 public class SysSettingDetail
 {
-    [Key]
     [Column("SYS_SETT_ID")]
-    public decimal? SysSettId { get; set; }
+    public decimal SysSettId { get; set; }
 
     [Column("SYS_SETT_TYPE_ID")]
-    public decimal? SysSettTypeId { get; set; }
+    public decimal SysSettTypeId { get; set; }
 
     [Column("SUB_SETTING_DESC_EN")]
     public string? SubSettingDescEn { get; set; }
@@ -30,5 +31,10 @@ public class SysSettingDetail
 
     [Column("CRT_DT")]
     public decimal? CrtDt { get; set; }
+
+    [Column("UPDT_BY")]
+    public decimal? UpdtBy { get; set; }
+
+    public virtual SettSysSettTypes SysSettType { get; set; } = null!;
 }
 

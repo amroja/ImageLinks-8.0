@@ -8,31 +8,36 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Folder Include="Common\Enums\" />
-    <Folder Include="Features\DocumentClass\DTO\" />
-    <Folder Include="Features\DocumentClass\IRepository\" />
-    <Folder Include="Features\DocumentClass\Mappers\" />
-    <Folder Include="Features\DocumentClass\Requests\" />
-    <Folder Include="Features\DocumentClass\Services\Implementation\" />
-    <Folder Include="Features\DocumentClass\Services\Interface\" />
-    <Folder Include="Features\Drawers\DTO\" />
-    <Folder Include="Features\Drawers\IRepository\" />
-    <Folder Include="Features\Drawers\Mappers\" />
-    <Folder Include="Features\Drawers\Requests\" />
-    <Folder Include="Features\Drawers\Services\Implementation\" />
-    <Folder Include="Features\Drawers\Services\Interface\" />
-    <Folder Include="Features\Folders\DTO\" />
-    <Folder Include="Features\Folders\IRepository\" />
-    <Folder Include="Features\Folders\Mappers\" />
-    <Folder Include="Features\Folders\Requests\" />
-    <Folder Include="Features\Folders\Services\Implementation\" />
-    <Folder Include="Features\Folders\Services\Interface\" />
-    <Folder Include="Features\Groups\DTO\" />
-    <Folder Include="Features\Groups\IRepository\" />
-    <Folder Include="Features\Groups\Mappers\" />
-    <Folder Include="Features\Groups\Requests\" />
-    <Folder Include="Features\Groups\Services\Implementation\" />
-    <Folder Include="Features\Groups\Services\Interface\" />
+    <Compile Remove="Features\Master\UsersMaster\SysSettingDetail\**" />
+    <EmbeddedResource Remove="Features\Master\UsersMaster\SysSettingDetail\**" />
+    <None Remove="Features\Master\UsersMaster\SysSettingDetail\**" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Features\Master\MasterConfig\Mappers\" />
+    <Folder Include="Features\Master\MasterConfig\Requests\" />
+    <Folder Include="Features\Master\MasterDbServersConfig\Mappers\" />
+    <Folder Include="Features\Master\MasterDbServersConfig\Requests\" />
+    <Folder Include="Features\Master\Requests\DTO\" />
+    <Folder Include="Features\Master\Requests\IRepository\" />
+    <Folder Include="Features\Master\Requests\Mappers\" />
+    <Folder Include="Features\Master\Requests\Requests\" />
+    <Folder Include="Features\Master\Requests\Services\Implementation\" />
+    <Folder Include="Features\Master\Requests\Services\Interface\" />
+    <Folder Include="Features\Master\TenantAppConfig\DTO\" />
+    <Folder Include="Features\Master\TenantAppConfig\IRepository\" />
+    <Folder Include="Features\Master\TenantAppConfig\Mappers\" />
+    <Folder Include="Features\Master\TenantAppConfig\Requests\" />
+    <Folder Include="Features\Master\TenantAppConfig\Services\Implementation\" />
+    <Folder Include="Features\Master\TenantAppConfig\Services\Interface\" />
+    <Folder Include="Features\Master\TenantConfig\DTO\" />
+    <Folder Include="Features\Master\TenantConfig\IRepository\" />
+    <Folder Include="Features\Master\TenantConfig\Mappers\" />
+    <Folder Include="Features\Master\TenantConfig\Requests\" />
+    <Folder Include="Features\Master\TenantConfig\Services\Implementation\" />
+    <Folder Include="Features\Master\TenantConfig\Services\Interface\" />
+    <Folder Include="Features\Master\UsersMaster\Mappers\" />
+    <Folder Include="Features\Master\UsersMaster\Requests\" />
     <Folder Include="Features\Identity\IRepository\" />
     <Folder Include="Features\Identity\Mappers\" />
     <Folder Include="Features\Indexes\DTO\" />
@@ -57,12 +62,6 @@
     <Folder Include="Features\SysSettingDetail\Requests\" />
     <Folder Include="Features\SysSettingDetail\Services\Implementation\" />
     <Folder Include="Features\SysSettingDetail\Services\Interface\" />
-    <Folder Include="Features\Trees\DTO\" />
-    <Folder Include="Features\Trees\IRepository\" />
-    <Folder Include="Features\Trees\Mappers\" />
-    <Folder Include="Features\Trees\Requests\" />
-    <Folder Include="Features\Trees\Services\Implementation\" />
-    <Folder Include="Features\Trees\Services\Interface\" />
   </ItemGroup>
 
   <ItemGroup>

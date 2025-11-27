@@ -1,9 +1,8 @@
-﻿using ImageLinks_.API.Extensions;
-using ImageLinks_.Application.Features.Identity.DTO;
+﻿using ImageLinks_.Application.Features.Identity.DTO;
 using ImageLinks_.Application.Features.Identity.Requests;
 using ImageLinks_.Application.Features.Identity.Services.Interface;
 using Microsoft.AspNetCore.Mvc;
-namespace ImageLinks_.API.Controllers
+namespace ImageLinks_.API.Controllers.Identity
 {
     [Route("api/[controller]")]
     public class IdentityController : ApiController

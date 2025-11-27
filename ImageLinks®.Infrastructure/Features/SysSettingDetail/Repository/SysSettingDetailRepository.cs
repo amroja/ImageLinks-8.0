@@ -1,6 +1,7 @@
 ﻿using Dapper;
 using ImageLinks_.Application;
 using ImageLinks_.Application.Common.Helpers;
+using ImageLinks_.Application.Features.SysSettingDetail.DTO;
 using ImageLinks_.Application.IRepository;
 using ImageLinks_.Domain.Models;
 using ImageLinks_.Infrastructure.Data;
@@ -24,7 +25,7 @@ namespace ImageLinks_.Infrastructure
             _db.SETT_SYSSETTDETAILS.Update(entity);
         }
 
-        public async Task<List<SysSettingDetail>?> SelectAsync(SysSettingDetail filter, CancellationToken ct = default)
+        public async Task<List<SysSettingDetail>?> SelectAsync(SysSettingDetailDto filter, CancellationToken ct = default)
         {
             var dbType = _genericService.GetDatabaseType();
             var sql = new StringBuilder(@"
@@ -43,49 +44,49 @@ namespace ImageLinks_.Infrastructure
             DynamicParameters? parameters = new DynamicParameters();
 
 
-            if (filter.SysSettId.HasValue)
+            if (!string.IsNullOrWhiteSpace(filter.SettId))
             {
                 sql.Append($" AND SYS_SETT_ID = {GeneralFunction.GetParam("SysSettId", dbType)}");
-                parameters.Add("SysSettId", filter.SysSettId);
+                parameters.Add("SysSettId", filter.SettId);
             }
 
-            if (filter.SysSettTypeId.HasValue)
+            if (!string.IsNullOrWhiteSpace(filter.SettTypeId))
             {
                 sql.Append($" AND SYS_SETT_TYPE_ID = {GeneralFunction.GetParam("SysSettTypeId", dbType)}");
-                parameters.Add("SysSettTypeId", filter.SysSettTypeId);
+                parameters.Add("SysSettTypeId", filter.SettTypeId);
             }
 
-            if (!string.IsNullOrWhiteSpace(filter.SubSettingDescEn))
+            if (!string.IsNullOrWhiteSpace(filter.DescEn))
             {
                 sql.Append($" AND LOWER(SUB_SETTING_DESC_EN) = LOWER({GeneralFunction.GetParam("SubSettingDescEn", dbType)})");
-                parameters.Add("SubSettingDescEn", filter.SubSettingDescEn);
+                parameters.Add("SubSettingDescEn", filter.DescEn);
             }
 
-            if (!string.IsNullOrWhiteSpace(filter.SubSettingDescAr))
+            if (!string.IsNullOrWhiteSpace(filter.DescAr))
             {
                 sql.Append($" AND LOWER(SUB_SETTING_DESC_AR) = LOWER({GeneralFunction.GetParam("SubSettingDescAr", dbType)})");
-                parameters.Add("SubSettingDescAr", filter.SubSettingDescAr);
+                parameters.Add("SubSettingDescAr", filter.DescAr);
             }
 
-            if (filter.UserId.HasValue)
+            if (!string.IsNullOrWhiteSpace(filter.UserId))
             {
                 sql.Append($" AND USER_ID = {GeneralFunction.GetParam("UserId", dbType)}");
                 parameters.Add("UserId", filter.UserId);
             }
 
-            if (!string.IsNullOrWhiteSpace(filter.SysSettValue))
+            if (!string.IsNullOrWhiteSpace(filter.SettValue))
             {
                 sql.Append($" AND LOWER(SYS_SETT_VALUE) = LOWER({GeneralFunction.GetParam("SysSettValue", dbType)})");
-                parameters.Add("SysSettValue", filter.SysSettValue);
+                parameters.Add("SysSettValue", filter.SettValue);
             }
 
-            if (filter.CrtBy.HasValue)
+            if (!string.IsNullOrWhiteSpace(filter.CrtBy))
             {
                 sql.Append($" AND CRT_BY = {GeneralFunction.GetParam("CrtBy", dbType)}");
                 parameters.Add("CrtBy", filter.CrtBy);
             }
 
-            if (filter.CrtDt.HasValue)
+            if (!string.IsNullOrWhiteSpace(filter.CrtDt))
             {
                 sql.Append($" AND CRT_DT = {GeneralFunction.GetParam("CrtDt", dbType)}");
                 parameters.Add("CrtDt", filter.CrtBy);
