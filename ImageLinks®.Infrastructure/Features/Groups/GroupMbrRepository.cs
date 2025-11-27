@@ -56,7 +56,7 @@ namespace ImageLinks_.Infrastructure.Features.Groups
 
             StringBuilder sql = new StringBuilder(@"
                      SELECT 
-                         GROUP_ID
+                         GROUP_ID AS GroupId
                      FROM GROUPMBR
                      WHERE 1 = 1
                        AND GROUP_ID != 0

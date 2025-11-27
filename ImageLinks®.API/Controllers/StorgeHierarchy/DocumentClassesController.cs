@@ -17,9 +17,9 @@ public class DocumentClassesController : ApiController
     }
 
     [HttpPost("Select")]
-    public async Task<IActionResult> SelectAsync([FromBody] DocRequest docRequest, CancellationToken ct)
+    public async Task<IActionResult> SelectAsync([FromBody] DocumentsRequest docRequest, CancellationToken ct)
     {
-        var result = await _docService.GetDocs(docRequest, ct);
+        var result = await _docService.GetDocumentsByParent(docRequest, ct);
 
         return result.Match(response => Ok(response), Problem);
     }

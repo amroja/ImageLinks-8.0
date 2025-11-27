@@ -6,4 +6,8 @@ namespace ImageLinks_.Application.Features.StorgeHierarchy.Folders.IRepository;
 public interface IFoldersRepository : IRepository<FoldersModel>
 {
     Task<List<FoldersModel>> SelectAsync(FoldersRequest filter, CancellationToken ct = default);
+    Task<List<FoldersModel>> SelectActiveFoldersForGroupsLevelOne(FoldersRequest filter, CancellationToken ct = default);
+    Task<List<FoldersModel>> SelectActiveFoldersForGroupsLevelThree(FoldersRequest filter, CancellationToken ct = default);
+    Task<List<FoldersModel>> SelectActiveFoldersForUserLevelOne(FoldersRequest filter, CancellationToken ct = default);
+    Task<List<FoldersModel>> SelectActiveFoldersForUserLevelThree(FoldersRequest filter, CancellationToken ct = default);
 }

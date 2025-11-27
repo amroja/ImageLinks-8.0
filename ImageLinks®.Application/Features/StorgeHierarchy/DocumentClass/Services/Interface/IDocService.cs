@@ -6,5 +6,6 @@ namespace ImageLinks_.Application.Features.StorgeHierarchy.DocumentClass.Service
 
 public interface IDocService
 {
-    Task<Result<List<DocDto>>> GetDocs(DocRequest filter, CancellationToken ct = default);
+    Task<Result<List<DocDto>>> GetDocs(DocumentsRequest filter, CancellationToken ct = default);
+    Task<Result<List<DocDto>>> GetDocumentsByParent(DocumentsRequest filter, CancellationToken ct = default);
 }

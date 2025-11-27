@@ -7,4 +7,6 @@ namespace ImageLinks_.Application.Features.StorgeHierarchy.Folders.Services.Inte
 public interface IFoldersService
 {
     Task<Result<List<FoldersDto>>> SelectAsync(FoldersRequest filter, CancellationToken ct = default);
+    Task<Result<List<FoldersDto>>> GetFoldersByParent(FoldersRequest filter, CancellationToken ct = default);
+
 }

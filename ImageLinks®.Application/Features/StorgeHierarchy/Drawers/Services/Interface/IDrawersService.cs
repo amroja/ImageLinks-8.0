@@ -8,4 +8,6 @@ namespace ImageLinks_.Application.Features.StorgeHierarchy.Drawers.Services.Inte
 public interface IDrawersService
 {
     Task<Result<List<DrawersDto>>> SelectAsync(DrawersRequest filter, CancellationToken ct = default);
+
+    Task<Result<List<DrawersDto>>> GetDrawersByParent(DrawersRequest filter, CancellationToken ct = default);
 }

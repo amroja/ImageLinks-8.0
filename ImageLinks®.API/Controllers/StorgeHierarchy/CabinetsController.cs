@@ -1,13 +1,10 @@
-﻿using ImageLinks_.API.Middleware;
-using ImageLinks_.Application.Common;
+﻿using ImageLinks_.Application.Common;
 using ImageLinks_.Application.Features.StorgeHierarchy.Cabinets.DTO;
 using ImageLinks_.Application.Features.StorgeHierarchy.Cabinets.Requests;
 using ImageLinks_.Application.Features.StorgeHierarchy.Cabinets.Services.Interface;
-using ImageLinks_.Application.Features.StorgeHierarchy.Trees.Requests;
 using ImageLinks_.Domain.Results;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using static ImageLinks_.Application.Common.Enums.GeneralEnums;
 
 namespace ImageLinks_.API.Controllers.StorgeHierarchy;
 
@@ -25,7 +22,6 @@ public class CabinetsController : ApiController
     }
 
     [HttpPost("Select")]
-    [ApiAuthorization(UserPrivileges.CanShowUserDocuments)]
     public async Task<IActionResult> SelectAsync([FromBody] CabinetsRequest filter, CancellationToken ct)
     {
         CabinetsRequest cabinetsRequest = new CabinetsRequest();

@@ -1,8 +1,10 @@
 ﻿using Dapper;
+using ImageLinks_.Application.Common.Enums;
 using ImageLinks_.Application.Common.Helpers;
 using ImageLinks_.Application.Features.StorgeHierarchy.DocumentClass.IRepository;
 using ImageLinks_.Application.Features.StorgeHierarchy.DocumentClass.Requests;
 using ImageLinks_.Application.IRepository;
+using ImageLinks_.Domain.Enums;
 using ImageLinks_.Domain.Models;
 using ImageLinks_.Infrastructure.Data;
 using ImageLinks_.Infrastructure.Repository;
@@ -15,56 +17,28 @@ public class DocRepository : Repository<Doc>, IDocRepository
     private readonly ApplicationDbContext _db;
     private readonly IGenericRepository _genericService;
 
-    public DocRepository(ApplicationDbContext db, IGenericRepository genericService) : base(db)
+    public DocRepository(ApplicationDbContext db, IGenericRepository genericService)
     {
         _db = db;
         _genericService = genericService;
     }
 
-    public async Task<List<Doc>> SelectAsync(DocRequest filter, CancellationToken ct = default)
+    public async Task<List<Doc>> SelectAsync(DocumentsRequest filter, CancellationToken ct = default)
     {
-        var dbType = _genericService.GetDatabaseType();
-                   StringBuilder? sql = new StringBuilder(@"
-                            SELECT 
-                                DOC_ID                   AS DocId                 ,
-                                DOC_CRSTAT               AS DocCrstat             ,
-                                DCNAME_ARB               AS DcnameArb             ,
-                                DCNAME_ENG               AS DcnameEng             ,
-                                DC_RCOUNT                AS DcRcount              ,
-                                DC_CABRIV                AS DcCabriv              ,
-                                UPD_DATE                 AS UpdDate               ,  
-                                UPD_PRSN                 AS UpdPrsn               ,
-                                DOC_STAT                 AS DocStat               ,
-                                MAX_VERNUM               AS MaxVernum             ,
-                                OCR_TEMPLT               AS OcrTemplt             ,
-                                RET_PRD                  AS RetPrd                ,
-                                OCR_PAGENUM              AS OcrPagenum            ,
-                                OCR_EVERYPAGE            AS OcrEverypage          ,
-                                WF_CLASS                 AS WfClass               ,
-                                DOCPHASE                 AS Docphase              ,
-                                CAT_ID                   AS CatId                 ,
-                                TEMP_ID                  AS TempId                ,
-                                OCR_TYPE                 AS OcrType               ,
-                                FILES_FILTER             AS FilesFilter           ,
-                                IS_PUBLIC                AS IsPublic              ,
-                                HAS_ROLES                AS HasRoles              ,
-                                HAS_BATCH_NAME           AS HasBatchName          ,
-                                HAS_FILE_CLASSIFICATION  AS HasFileClassification ,
-                                BARCODEZONE              AS Barcodezone           ,
-                                BARCODEFORMAT            AS Barcodeformat         ,
-                                HAS_WATERMARK            AS HasWatermark          ,
-                                LICENSE_DOMAIN_ID        AS LicenseDomainId       ,
-                                NOT_MATCHED_OP           AS NotMatchedOp          ,
-                                EXPAND_G_INDEX           AS ExpandGIndex          ,
-                                EXPAND_C_INDEX           AS ExpandCIndex          ,
-                                MATCHING_OPTIONS         AS MatchingOptions       ,
-                                AUTO_INDEX_OP            AS AutoIndexOp           ,
-                                MAX_DOCN_COUNT           AS MaxDocnCount          
-                            FROM DOCS
-                            WHERE 1 = 1
+        DatabaseProvider dbType = _genericService.GetDatabaseType();
+
+        StringBuilder sql = new StringBuilder(@"
+            SELECT
+                DOC_ID             AS DocId,
+                DCNAME_ARB         AS DcnameArb,
+                DCNAME_ENG         AS DcnameEng,
+                DOC_STAT           AS DocStat,
+                LICENSE_DOMAIN_ID  AS LicenseDomainId
+            FROM DOCS
+            WHERE 1 = 1
         ");
 
-        var parameters = new DynamicParameters();
+        DynamicParameters parameters = new DynamicParameters();
 
         if (!string.IsNullOrWhiteSpace(filter.DocId))
         {
@@ -74,20 +48,14 @@ public class DocRepository : Repository<Doc>, IDocRepository
 
         if (!string.IsNullOrWhiteSpace(filter.DcnameArb))
         {
-            sql.Append($" AND DCNAME_ARB LIKE {GeneralFunction.GetParam("DcnameArb", dbType)}");
-            parameters.Add("DcnameArb", $"%{filter.DcnameArb}%");
+            sql.Append($" AND LOWER(DCNAME_ARB) = LOWER({GeneralFunction.GetParam("DcnameArb", dbType)})");
+            parameters.Add("DcnameArb", filter.DcnameArb);
         }
 
         if (!string.IsNullOrWhiteSpace(filter.DcnameEng))
         {
-            sql.Append($" AND DCNAME_ENG LIKE {GeneralFunction.GetParam("DcnameEng", dbType)}");
-            parameters.Add("DcnameEng", $"%{filter.DcnameEng}%");
-        }
-
-        if (!string.IsNullOrWhiteSpace(filter.CatId))
-        {
-            sql.Append($" AND CAT_ID = {GeneralFunction.GetParam("CatId", dbType)}");
-            parameters.Add("CatId", filter.CatId);
+            sql.Append($" AND LOWER(DCNAME_ENG) = LOWER({GeneralFunction.GetParam("DcnameEng", dbType)})");
+            parameters.Add("DcnameEng", filter.DcnameEng);
         }
 
         if (!string.IsNullOrWhiteSpace(filter.DocStat))
@@ -96,11 +64,307 @@ public class DocRepository : Repository<Doc>, IDocRepository
             parameters.Add("DocStat", filter.DocStat);
         }
 
-        if (!string.IsNullOrWhiteSpace(filter.IsPublic))
+        if (!string.IsNullOrWhiteSpace(filter.LicenseDomainId))
         {
-            sql.Append($" AND IS_PUBLIC = {GeneralFunction.GetParam("IsPublic", dbType)}");
-            parameters.Add("IsPublic", filter.IsPublic);
+            sql.Append($" AND LICENSE_DOMAIN_ID = {GeneralFunction.GetParam("LicenseDomainId", dbType)}");
+            parameters.Add("LicenseDomainId", filter.LicenseDomainId);
         }
+
+        return await _genericService.GetListAsync<Doc>(sql.ToString(), parameters, null, ct);
+    }
+
+    public async Task<List<Doc>> SelectActiveDocumentsForGroupsLevelOne(DocumentsRequest filter, CancellationToken ct = default)
+    {
+        DatabaseProvider dbType = _genericService.GetDatabaseType();
+
+        StringBuilder sql = new StringBuilder(@"
+            SELECT DISTINCT
+                doc.Doc_ID      AS DocId,
+                doc.DcName_ARB  AS DcnameArb,
+                doc.DcName_ENG  AS DcnameEng,
+                fobj.DOC_SER    AS DocSer
+            FROM Docs doc
+            INNER JOIN FoldObj fobj   ON doc.Doc_ID    = fobj.Doc_ID
+            INNER JOIN Folders f      ON fobj.Fold_ID  = f.Fold_ID
+            LEFT JOIN GroupSec gs     ON doc.Doc_ID    = gs.Obj_ID
+            LEFT JOIN GroupSec gs1    ON f.Fold_ID     = gs1.Obj_ID
+            WHERE 1 = 1
+        ");
+
+        DynamicParameters parameters = new DynamicParameters();
+
+        if (!string.IsNullOrWhiteSpace(filter.TreeId))
+        {
+            sql.Append($" AND t.Tree_ID = {GeneralFunction.GetParam("TreeId", dbType)}");
+            parameters.Add("TreeId", filter.TreeId);
+        }
+
+        if (!string.IsNullOrWhiteSpace(filter.FolderId))
+        {
+            sql.Append($" AND f.Fold_ID = {GeneralFunction.GetParam("FoldId", dbType)}");
+            parameters.Add("FoldId", filter.FolderId);
+        }
+
+        if (!string.IsNullOrWhiteSpace(filter.DcnameArb))
+        {
+            sql.Append($" AND LOWER(doc.DCNAME_ARB) = LOWER({GeneralFunction.GetParam("DcnameArb", dbType)})");
+            parameters.Add("DcnameArb", filter.DcnameArb);
+        }
+
+        if (!string.IsNullOrWhiteSpace(filter.DcnameEng))
+        {
+            sql.Append($" AND LOWER(doc.DCNAME_ENG) = LOWER({GeneralFunction.GetParam("DcnameEng", dbType)})");
+            parameters.Add("DcnameEng", filter.DcnameEng);
+        }
+
+        if (!string.IsNullOrWhiteSpace(filter.LicenseDomainId))
+        {
+            sql.Append($" AND doc.LICENSE_DOMAIN_ID = {GeneralFunction.GetParam("LicenseDomainId", dbType)}");
+            parameters.Add("LicenseDomainId", filter.LicenseDomainId);
+        }
+
+        if (!string.IsNullOrWhiteSpace(filter.DocumentClassId) && filter.DocumentClassId != "-1")
+        {
+            sql.Append($" AND doc.Doc_ID IN ({filter.DocumentClassId})");
+        }
+
+        sql.Append($" AND doc.DOC_STAT = 1");
+
+        if (filter.GroupIds != null && filter.GroupIds.Any())
+        {
+            sql.Append($" AND gs.Group_ID IN {GeneralFunction.GetParam("GroupIds", dbType)}");
+            sql.Append($" AND gs1.Group_ID IN {GeneralFunction.GetParam("GroupIds1", dbType)}");
+
+            parameters.Add("GroupIds", filter.GroupIds);
+            parameters.Add("GroupIds1", filter.GroupIds);
+        }
+
+        sql.Append($" AND gs.Obj_Level = {(int)GeneralEnums.OBJ_LEVEL.DOCUMENT_PRIVILEGES}");
+        sql.Append($" AND gs.Obj_Flag >= 1");
+        sql.Append($" AND gs1.Obj_Level = {(int)GeneralEnums.OBJ_LEVEL.FOLDER_PRIVILEGES}");
+        sql.Append($" AND gs1.Obj_Flag >= 1");
+
+        return await _genericService.GetListAsync<Doc>(sql.ToString(), parameters, null, ct);
+    }
+
+    public async Task<List<Doc>> SelectActiveDocumentsForGroupsLevelFour(DocumentsRequest filter, CancellationToken ct = default)
+    {
+        DatabaseProvider dbType = _genericService.GetDatabaseType();
+
+        StringBuilder sql = new StringBuilder(@"
+            SELECT DISTINCT
+                doc.Doc_ID      AS DocId,
+                doc.DcName_ARB  AS DcnameArb,
+                doc.DcName_ENG  AS DcnameEng,
+                tob.OBJ_SER     AS DocSer
+            FROM Docs doc
+            INNER JOIN Tree_Obj tob   ON doc.Doc_ID    = tob.Obj_ID
+            INNER JOIN Trees t        ON tob.Tree_ID   = t.Tree_ID
+            LEFT JOIN GroupSec gs     ON doc.Doc_ID    = gs.Obj_ID
+            WHERE 1 = 1
+        ");
+
+        DynamicParameters parameters = new DynamicParameters();
+
+        if (!string.IsNullOrWhiteSpace(filter.TreeId))
+        {
+            sql.Append($" AND t.Tree_ID = {GeneralFunction.GetParam("TreeId", dbType)}");
+            parameters.Add("TreeId", filter.TreeId);
+        }
+
+        if (!string.IsNullOrWhiteSpace(filter.DcnameArb))
+        {
+            sql.Append($" AND LOWER(doc.DCNAME_ARB) = LOWER({GeneralFunction.GetParam("DcnameArb", dbType)})");
+            parameters.Add("DcnameArb", filter.DcnameArb);
+        }
+
+        if (!string.IsNullOrWhiteSpace(filter.DcnameEng))
+        {
+            sql.Append($" AND LOWER(doc.DCNAME_ENG) = LOWER({GeneralFunction.GetParam("DcnameEng", dbType)})");
+            parameters.Add("DcnameEng", filter.DcnameEng);
+        }
+
+        if (!string.IsNullOrWhiteSpace(filter.LicenseDomainId))
+        {
+            sql.Append($" AND doc.LICENSE_DOMAIN_ID = {GeneralFunction.GetParam("LicenseDomainId", dbType)}");
+            parameters.Add("LicenseDomainId", filter.LicenseDomainId);
+        }
+
+        if (!string.IsNullOrWhiteSpace(filter.DocumentClassId) && filter.DocumentClassId != "-1")
+        {
+            sql.Append($" AND doc.Doc_ID IN ({filter.DocumentClassId})");
+        }
+
+        sql.Append($" AND doc.DOC_STAT = 1");
+
+        if (filter.GroupIds != null && filter.GroupIds.Any())
+        {
+            sql.Append($" AND gs.Group_ID IN {GeneralFunction.GetParam("GroupIds", dbType)}");
+            parameters.Add("GroupIds", filter.GroupIds);
+        }
+
+        sql.Append($" AND gs.Obj_Level = {(int)GeneralEnums.OBJ_LEVEL.DOCUMENT_PRIVILEGES}");
+        sql.Append($" AND gs.Obj_Flag >= 1");
+
+        return await _genericService.GetListAsync<Doc>(sql.ToString(), parameters, null, ct);
+    }
+
+    public async Task<List<Doc>> SelectActiveDocumentsForUserLevelOne(DocumentsRequest filter, CancellationToken ct = default)
+    {
+        DatabaseProvider dbType = _genericService.GetDatabaseType();
+
+        StringBuilder sql = new StringBuilder(@"
+            SELECT DISTINCT
+                doc.Doc_ID      AS DocId,
+                doc.DcName_ARB  AS DcnameArb,
+                doc.DcName_ENG  AS DcnameEng,
+                fobj.DOC_SER    AS DocSer
+            FROM Docs doc
+            INNER JOIN FoldObj fobj   ON doc.Doc_ID    = fobj.Doc_ID
+            INNER JOIN Folders f      ON fobj.Fold_ID  = f.Fold_ID
+            INNER JOIN DrwObj dobj    ON f.Fold_ID     = dobj.Fold_ID
+            INNER JOIN Drawers d      ON dobj.Drw_ID   = d.Drw_ID
+            INNER JOIN CabObj cobj    ON d.Drw_ID      = cobj.Drw_ID
+            INNER JOIN Cabinets cab   ON cobj.Cab_ID   = cab.Cab_ID
+            INNER JOIN Tree_Obj tob   ON cab.Cab_ID    = tob.Obj_ID
+            INNER JOIN Trees t        ON tob.Tree_ID   = t.Tree_ID
+            LEFT JOIN UserSec us      ON doc.Doc_ID    = us.Obj_ID
+            LEFT JOIN UserSec us1     ON f.Fold_ID     = us1.Obj_ID
+            LEFT JOIN UserSec us2     ON d.Drw_ID      = us2.Obj_ID
+            LEFT JOIN UserSec us3     ON cab.Cab_ID    = us3.Obj_ID
+            WHERE 1 = 1
+        ");
+
+        DynamicParameters parameters = new DynamicParameters();
+
+        if (!string.IsNullOrWhiteSpace(filter.TreeId))
+        {
+            sql.Append($" AND t.Tree_ID = {GeneralFunction.GetParam("TreeId", dbType)}");
+            parameters.Add("TreeId", filter.TreeId);
+        }
+
+        if (!string.IsNullOrWhiteSpace(filter.CabinetId))
+        {
+            sql.Append($" AND cab.Cab_ID = {GeneralFunction.GetParam("CabId", dbType)}");
+            parameters.Add("CabId", filter.CabinetId);
+        }
+
+        if (!string.IsNullOrWhiteSpace(filter.DrawerId))
+        {
+            sql.Append($" AND d.Drw_ID = {GeneralFunction.GetParam("DrwId", dbType)}");
+            parameters.Add("DrwId", filter.DrawerId);
+        }
+
+        if (!string.IsNullOrWhiteSpace(filter.FolderId))
+        {
+            sql.Append($" AND f.Fold_ID = {GeneralFunction.GetParam("FoldId", dbType)}");
+            parameters.Add("FoldId", filter.FolderId);
+        }
+
+        if (!string.IsNullOrWhiteSpace(filter.DcnameArb))
+        {
+            sql.Append($" AND LOWER(doc.DCNAME_ARB) = LOWER({GeneralFunction.GetParam("DcnameArb", dbType)})");
+            parameters.Add("DcnameArb", filter.DcnameArb);
+        }
+
+        if (!string.IsNullOrWhiteSpace(filter.DcnameEng))
+        {
+            sql.Append($" AND LOWER(doc.DCNAME_ENG) = LOWER({GeneralFunction.GetParam("DcnameEng", dbType)})");
+            parameters.Add("DcnameEng", filter.DcnameEng);
+        }
+
+        if (!string.IsNullOrWhiteSpace(filter.LicenseDomainId))
+        {
+            sql.Append($" AND doc.LICENSE_DOMAIN_ID = {GeneralFunction.GetParam("LicenseDomainId", dbType)}");
+            parameters.Add("LicenseDomainId", filter.LicenseDomainId);
+        }
+
+        if (!string.IsNullOrWhiteSpace(filter.DocumentClassId) && filter.DocumentClassId != "-1")
+        {
+            sql.Append($" AND doc.Doc_ID IN ({filter.DocumentClassId})");
+        }
+
+        sql.Append($" AND doc.DOC_STAT = 1");
+
+        if (!string.IsNullOrWhiteSpace(filter.UserId))
+        {
+            sql.Append($" AND us.User_ID = {GeneralFunction.GetParam("UserId", dbType)}");
+            sql.Append($" AND us1.User_ID = {GeneralFunction.GetParam("UserId1", dbType)}");
+            sql.Append($" AND us2.User_ID = {GeneralFunction.GetParam("UserId2", dbType)}");
+            sql.Append($" AND us3.User_ID = {GeneralFunction.GetParam("UserId3", dbType)}");
+            parameters.Add("UserId", filter.UserId);
+            parameters.Add("UserId1", filter.UserId);
+            parameters.Add("UserId2", filter.UserId);
+            parameters.Add("UserId3", filter.UserId);
+        }
+
+        sql.Append($" AND us.Obj_Level = {(int)GeneralEnums.OBJ_LEVEL.DOCUMENT_PRIVILEGES}");
+        sql.Append($" AND us.Obj_Flag >= 1");
+        sql.Append($" AND us1.Obj_Level = {(int)GeneralEnums.OBJ_LEVEL.FOLDER_PRIVILEGES}");
+        sql.Append($" AND us2.Obj_Level = {(int)GeneralEnums.OBJ_LEVEL.DRAWER_PRIVILEGES}");
+        sql.Append($" AND us3.Obj_Level = {(int)GeneralEnums.OBJ_LEVEL.CABINET_PRIVILEGES}");
+
+        return await _genericService.GetListAsync<Doc>(sql.ToString(), parameters, null, ct);
+    }
+
+    public async Task<List<Doc>> SelectActiveDocumentsForUserLevelFour(DocumentsRequest filter, CancellationToken ct = default)
+    {
+        DatabaseProvider dbType = _genericService.GetDatabaseType();
+
+        StringBuilder sql = new StringBuilder(@"
+            SELECT DISTINCT
+                doc.Doc_ID      AS DocId,
+                doc.DcName_ARB  AS DcnameArb,
+                doc.DcName_ENG  AS DcnameEng,
+                tob.OBJ_SER     AS DocSer
+            FROM Docs doc
+            INNER JOIN Tree_Obj tob   ON doc.Doc_ID    = tob.Obj_ID
+            INNER JOIN Trees t        ON tob.Tree_ID   = t.Tree_ID
+            LEFT JOIN UserSec us      ON doc.Doc_ID    = us.Obj_ID
+            WHERE 1 = 1
+        ");
+
+        DynamicParameters parameters = new DynamicParameters();
+
+        if (!string.IsNullOrWhiteSpace(filter.TreeId))
+        {
+            sql.Append($" AND t.Tree_ID = {GeneralFunction.GetParam("TreeId", dbType)}");
+            parameters.Add("TreeId", filter.TreeId);
+        }
+
+        if (!string.IsNullOrWhiteSpace(filter.DcnameArb))
+        {
+            sql.Append($" AND LOWER(doc.DCNAME_ARB) = LOWER({GeneralFunction.GetParam("DcnameArb", dbType)})");
+            parameters.Add("DcnameArb", filter.DcnameArb);
+        }
+
+        if (!string.IsNullOrWhiteSpace(filter.DcnameEng))
+        {
+            sql.Append($" AND LOWER(doc.DCNAME_ENG) = LOWER({GeneralFunction.GetParam("DcnameEng", dbType)})");
+            parameters.Add("DcnameEng", filter.DcnameEng);
+        }
+
+        if (!string.IsNullOrWhiteSpace(filter.LicenseDomainId))
+        {
+            sql.Append($" AND doc.LICENSE_DOMAIN_ID = {GeneralFunction.GetParam("LicenseDomainId", dbType)}");
+            parameters.Add("LicenseDomainId", filter.LicenseDomainId);
+        }
+
+        if (!string.IsNullOrWhiteSpace(filter.DocumentClassId) && filter.DocumentClassId != "-1")
+        {
+            sql.Append($" AND doc.Doc_ID IN ({filter.DocumentClassId})");
+        }
+
+        sql.Append($" AND doc.DOC_STAT = 1");
+
+        if (!string.IsNullOrWhiteSpace(filter.UserId))
+        {
+            sql.Append($" AND us.User_ID = {GeneralFunction.GetParam("UserId", dbType)}");
+            parameters.Add("UserId", filter.UserId);
+        }
+
+        sql.Append($" AND us.Obj_Level = {(int)GeneralEnums.OBJ_LEVEL.DOCUMENT_PRIVILEGES}");
+        sql.Append($" AND us.Obj_Flag >= 1");
 
         return await _genericService.GetListAsync<Doc>(sql.ToString(), parameters, null, ct);
     }

@@ -111,15 +111,15 @@ public class TreeRepository : Repository<Tree>, ITreeRepository
         DatabaseProvider dbType = _genericService.GetDatabaseType();
 
         StringBuilder sql = new StringBuilder(@"
-                           SELECT DISTINCT 
-                               T.TREE_ID        AS TreeId    ,
-                               T.RNAME_ARB      AS RnameArb  ,
-                               T.RNAME_ENG      AS RnameEng  ,
-                               T.TREE_LVL       AS TreeLvl
-                           FROM UserSec U
-                           RIGHT OUTER JOIN Trees T ON U.Obj_ID = T.TREE_ID
-                           WHERE 1 = 1
-                               AND T.TREE_STAT = 1
+              SELECT DISTINCT 
+                  T.TREE_ID        AS TreeId  ,
+                  T.RNAME_ARB      AS RnameArb,
+                  T.RNAME_ENG      AS RnameEng,
+                  T.TREE_LVL       AS TreeLvl
+              FROM UserSec U
+              RIGHT OUTER JOIN Trees T ON U.Obj_ID = T.TREE_ID
+              WHERE 1 = 1
+                  AND T.TREE_STAT = 1
         ");
 
         DynamicParameters parameters = new DynamicParameters();
@@ -150,15 +150,15 @@ public class TreeRepository : Repository<Tree>, ITreeRepository
         var dbType = _genericService.GetDatabaseType();
 
         StringBuilder? sql = new StringBuilder($@"
-                              SELECT DISTINCT 
-                                  Trees.Tree_ID     AS TreeId      ,
-                                  Trees.RName_ENG   AS RnameEng    ,
-                                  Trees.RName_ARB   AS RnameArb    ,
-                                  Trees.Tree_Lvl    AS TreeLvl
-                              FROM GroupSec
-                              RIGHT OUTER JOIN Trees ON GroupSec.Obj_ID = Trees.Tree_ID
-                              WHERE TREE_STAT = 1
-                                AND GroupSec.Obj_Level = {GeneralEnums.OBJ_LEVEL.TREE_PRIVILEGES.GetHashCode()}");
+              SELECT DISTINCT 
+                  Trees.Tree_ID     AS TreeId  ,
+                  Trees.RName_ENG   AS RnameEng,
+                  Trees.RName_ARB   AS RnameArb,
+                  Trees.Tree_Lvl    AS TreeLvl
+              FROM GroupSec
+              RIGHT OUTER JOIN Trees ON GroupSec.Obj_ID = Trees.Tree_ID
+              WHERE TREE_STAT = 1
+                AND GroupSec.Obj_Level = {GeneralEnums.OBJ_LEVEL.TREE_PRIVILEGES.GetHashCode()}");
 
         DynamicParameters parameters = new DynamicParameters();
 

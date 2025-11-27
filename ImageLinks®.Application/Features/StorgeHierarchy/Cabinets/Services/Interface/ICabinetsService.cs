@@ -9,5 +9,4 @@ public interface ICabinetsService
     Task<Result<List<CabinetsDto>>> GetCabinets(CabinetsRequest filter, CancellationToken ct = default);
 
     Task<Result<List<CabinetsDto>>> GetCabinetsByParent(CabinetsRequest filter, CancellationToken ct = default);
-
 }
